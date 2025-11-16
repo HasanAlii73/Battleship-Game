@@ -26,7 +26,7 @@ class GameBoard {
     this.numberOfSunkShips = 0;
   }
   
-  addShip(ship, ax, ay, axis) { // r, c
+  addShip(ship, ax, ay, axis) {
     if(axis === 'horizontal') {
       if(ay + ship.length > 10) return false;
       for (let i = ay; i < ay + ship.length; i++) {
@@ -68,4 +68,11 @@ class GameBoard {
   }
 }
 
-module.exports = { Ship, GameBoard };
+class Player {
+    constructor(type, gameBoard) {
+        this.type = type;
+        this.gameBoard = gameBoard;
+    }
+}
+
+module.exports = { Ship, GameBoard, Player };
