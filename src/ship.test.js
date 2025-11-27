@@ -1,4 +1,5 @@
 const { Ship, GameBoard } = require('./ship');
+const {load, placeShipsRandomly} = require('./game');
 
 test('Ship hit method increments hitPoints and updates sunk status', () => {
   const ship = new Ship('Destroyer', 3, 0);
@@ -86,4 +87,21 @@ test('GameBoard allSunk method returns true when all ships are sunk', () => {
   for (let i = 0; i < 2; i++) gameBoard.reciveAttack(4, i); // Sink Patrol Boat
   
   expect(gameBoard.allSunk()).toBe(true);
+});
+
+test('place ships randomly in a correct way', () => {
+  const gameBoard = new GameBoard();
+  placeShipsRandomly(gameBoard);
+
+  let shipCount = 0;
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const cell = gameBoard.ships[i][j];
+      if (cell !== 0 && cell !== 1) {
+        shipCount++;
+      }
+    }
+  }
+  // There are 5 ships with lengths 5,4,3,3,2 totaling 17 cells
+  expect(shipCount).toBe(17);
 });

@@ -27,7 +27,7 @@ class GameBoard {
   }
   
   addShip(ship, ax, ay, axis) {
-    if(axis === 'horizontal') {
+    if(axis === 'vertical') {
       if(ay + ship.length > 10) return false;
       for (let i = ay; i < ay + ship.length; i++) {
         if(this.ships[ax][i] !== 0) return false;
@@ -37,7 +37,8 @@ class GameBoard {
       }
       return true;
     } 
-    else if(axis === 'vertical') {
+    
+    else if(axis === 'horizontal') {
       if(ax + ship.length > 10) return false;
       for (let i = ax; i < ax + ship.length; i++) {
         if(this.ships[i][ay] !== 0) return false;
