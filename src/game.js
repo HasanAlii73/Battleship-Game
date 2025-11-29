@@ -23,11 +23,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetBtn = document.getElementById('reset-btn');
     const randomBtn = document.getElementById('random-btn');
     const gameStatus = document.querySelector('.game-status');
+    const playerGameBoard = new GameBoard();
+    const computerGameBoard = new GameBoard();
 
-    function createBoard(boardElement) {
+    function createBoard(boardElement, gameBoard) {
         boardElement.innerHTML = '';
 
-        const gameBoard = new GameBoard();
+        // const gameBoard = new GameBoard();
         placeShipsRandomly(gameBoard);
 
         for (let i = 0; i < 10; i++) {
@@ -48,13 +50,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
-
     function initializeGame() {
         // Initialize placing board
         // createBoard(placingBoard);
-        createBoard(playerBoard);
-        createBoard(computerBoard);
+        createBoard(playerBoard, playerGameBoard);
+        createBoard(computerBoard, computerGameBoard);
         
     }
 
@@ -76,9 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
         computerCells.forEach(cell => {
             cell.addEventListener('click', function () {
                 if (!this.classList.contains('hit') && !this.classList.contains('miss')) {
-                    if (this.classList.contains('ship')) {
+                    if (this.classList.contains('ship') && computerGameBoard.reciveAttack(parseInt(this.dataset.col), parseInt(this.dataset.row))) {
                         this.classList.add('hit');
                         gameStatus.textContent = "DIRECT HIT! ENEMY VESSEL DAMAGED!";
+                        if(computerGameBoard.allSunk()) {
+                            gameStatus.textContent = "ALL ENEMY VESSELS DESTROYED - VICTORY ACHIEVED!";
+                        }
                     } else {
                         this.classList.add('miss');
                         gameStatus.textContent = "TARGET MISSED - RECALIBRATING";
