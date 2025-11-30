@@ -23,24 +23,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetBtn = document.getElementById('reset-btn');
     const randomBtn = document.getElementById('random-btn');
     const gameStatus = document.querySelector('.game-status');
-    const playerGameBoard = new GameBoard();
-    const computerGameBoard = new GameBoard();
+    let playerGameBoard = null;
+    let computerGameBoard = null;
 
-    function createBoard(boardElement, gameBoard) {
+    function createBoard(boardElement, role) {
         boardElement.innerHTML = '';
 
-        // const gameBoard = new GameBoard();
-        placeShipsRandomly(gameBoard);
+        const newBoard = new GameBoard();
+        placeShipsRandomly(newBoard);
 
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
+        for (let row = 0; row < 10; row++) {
+            for (let col = 0; col < 10; col++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.dataset.row = j;
-                cell.dataset.col = i;
-                cell.classList.remove = 'ship';
+                cell.dataset.row = row;
+                cell.dataset.col = col;
 
-                const ship = gameBoard.ships[i][j];
+                if (role === 'player') {
+                    cell.classList.add('player');
+                } else {
+                    cell.classList.add('computer');
+                }
+
+                const ship = newBoard.ships[row][col];
                 if (ship !== 0 && ship !== 1) {
                     cell.classList.add('ship');
                 }
@@ -48,22 +53,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 boardElement.appendChild(cell);
             }
         }
+
+        return newBoard;
     }
 
     function initializeGame() {
-        // Initialize placing board
-        // createBoard(placingBoard);
-        createBoard(playerBoard, playerGameBoard);
-        createBoard(computerBoard, computerGameBoard);
+        // Initialize placing board and assign new GameBoard instances
+        playerGameBoard = createBoard(playerBoard, 'player');
+        computerGameBoard = createBoard(computerBoard, 'computer');
         
     }
 
+    function shoot() {
+
+    }
+
+    function computerTurnToShoot() {
+            const x = Math.floor(Math.random() * 10);
+            const y = Math.floor(Math.random() * 10);
+
+    }
 
 
-
-    // Initialize boards
-    // createBoard(playerBoard, true);
-    // createBoard(computerBoard, false);
     initializeGame();
 
     // Add event listeners for game controls
@@ -76,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
         computerCells.forEach(cell => {
             cell.addEventListener('click', function () {
                 if (!this.classList.contains('hit') && !this.classList.contains('miss')) {
-                    if (this.classList.contains('ship') && computerGameBoard.reciveAttack(parseInt(this.dataset.col), parseInt(this.dataset.row))) {
+                    if (this.classList.contains('ship') && computerGameBoard.reciveAttack(parseInt(this.dataset.row), parseInt(this.dataset.col))) {
                         this.classList.add('hit');
                         gameStatus.textContent = "DIRECT HIT! ENEMY VESSEL DAMAGED!";
                         if(computerGameBoard.allSunk()) {
@@ -92,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     resetBtn.addEventListener('click', function () {
-        createBoard(playerBoard, true);
-        createBoard(computerBoard, false);
+        initializeGame();
+
         gameStatus.textContent = "SYSTEMS RESET - DEPLOY YOUR FLEET";
         startBtn.disabled = false;
     });
@@ -105,6 +116,16 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 }
 module.exports =  {load, placeShipsRandomly};
+
+
+
+
+
+
+
+
+
+
 //  <div class="container">
 //       <header>
 //         <h1>BATTLESHIP</h1>
