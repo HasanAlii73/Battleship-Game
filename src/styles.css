@@ -380,3 +380,9 @@ button:active {
   align-items: center;
   justify-content: center;  
 }
+
+.cell.disabled::after {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
