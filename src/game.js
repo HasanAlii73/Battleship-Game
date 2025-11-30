@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gameStatus = document.querySelector('.game-status');
     let playerGameBoard = null;
     let computerGameBoard = null;
+    let boardLocked = false;
 
     function createBoard(boardElement, role) {
         boardElement.innerHTML = '';
@@ -64,34 +65,39 @@ document.addEventListener('DOMContentLoaded', function () {
         
     }
 
-    function shoot() {
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-    }
-
-    function computerTurnToShoot() {
-        const x = Math.floor(Math.random() * 10);
-        const y = Math.floor(Math.random() * 10);
-
+    async function computerTurnToShoot() {
         const playerCells = document.querySelectorAll('.player-board .cell');
-        const targetCell = Array.from(playerCells).find(cell => parseInt(cell.dataset.row) === x && parseInt(cell.dataset.col) === y);
 
-        if (!targetCell.classList.contains('hit') && !targetCell.classList.contains('miss') && !targetCell.classList.contains('disabled')) {
-            if (targetCell.classList.contains('ship') && playerGameBoard.reciveAttack(x, y)) {
-                targetCell.classList.add('hit');
-                gameStatus.textContent = "ENEMY STRIKE! YOUR VESSEL HAS BEEN HIT!";
-                if(playerGameBoard.allSunk()) {
-                    gameStatus.textContent = "ALL YOUR VESSELS HAVE BEEN DESTROYED - DEFEAT!";
-                    playerCells.forEach(cell => cell.classList.add('disabled'));
-                    document.querySelectorAll('.computer-board .cell').forEach(cell => cell.classList.add('disabled'));
-                    return;
-                }
-            } else {
-                targetCell.classList.add('miss');
-                gameStatus.textContent = "ENEMY MISSED! YOUR VESSEL IS SAFE!";
-            }
-        } else {
-            computerTurnToShoot(); // Retry if the cell was already targeted
+        while (true) {
+            const x = Math.floor(Math.random() * 10);
+            const y = Math.floor(Math.random() * 10);
+            const targetCell = Array.from(playerCells).find(cell => parseInt(cell.dataset.row) === x && parseInt(cell.dataset.col) === y);
+
+        // if target already tried, pick again (loop)
+        if (!targetCell || targetCell.classList.contains('hit') || targetCell.classList.contains('miss')) {
+          continue;
         }
+
+        // small delay to simulate thinking (optional)
+        await sleep(600);
+
+                    if (targetCell.classList.contains('ship') && playerGameBoard.reciveAttack(x, y)) {
+                    targetCell.classList.add('hit');
+                    gameStatus.textContent = "ENEMY STRIKE! YOUR VESSEL HAS BEEN HIT!";
+                    if (playerGameBoard.allSunk()) {
+                        gameStatus.textContent = "ALL YOUR VESSELS HAVE BEEN DESTROYED - DEFEAT!";
+                        boardLocked = true;
+                        playerBoard.classList.add('disabled');
+                        computerBoard.classList.add('disabled');
+                    }
+        } else {
+          targetCell.classList.add('miss');
+          gameStatus.textContent = "ENEMY MISSED! YOUR VESSEL IS SAFE!";
+    }
+    return; // shot processed, exit
+  }
 
     }
 
@@ -105,23 +111,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Add click handlers to computer board for gameplay
         const computerCells = document.querySelectorAll('.computer-board .cell');
+
         computerCells.forEach(cell => {
-            cell.addEventListener('click', function () {
+            cell.addEventListener('click', async function () {
+                if (boardLocked) return;
                 if (!this.classList.contains('hit') && !this.classList.contains('miss') && !this.classList.contains('disabled')) {
                     if (this.classList.contains('ship') && computerGameBoard.reciveAttack(parseInt(this.dataset.row), parseInt(this.dataset.col))) {
                         this.classList.add('hit');
                         gameStatus.textContent = "DIRECT HIT! ENEMY VESSEL DAMAGED!";
                         if(computerGameBoard.allSunk()) {
                             gameStatus.textContent = "ALL ENEMY VESSELS DESTROYED - VICTORY ACHIEVED!";
-                            computerCells.forEach(cell => cell.classList.add('disabled'));
-                            document.querySelectorAll('.player-board .cell').forEach(cell => cell.classList.add('disabled'));
+                            // lock game and mark boards disabled
+                            boardLocked = true;
+                            computerBoard.classList.add('disabled');
+                            playerBoard.classList.add('disabled');
                             return;
                         }
                     } else {
                         this.classList.add('miss');
                         gameStatus.textContent = "TARGET MISSED - RECALIBRATING";
                     }
-                    setTimeout(computerTurnToShoot, 1000);
+                    boardLocked = true;
+                    await sleep(200);
+                    await computerTurnToShoot();
+                    boardLocked = false;
+                    // setTimeout(computerTurnToShoot, 1000);
                 }
             });
         });
@@ -129,6 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     resetBtn.addEventListener('click', function () {
         initializeGame();
+        // unlock boards and remove disabled visual state
+        boardLocked = false;
+        playerBoard.classList.remove('disabled');
+        computerBoard.classList.remove('disabled');
 
         gameStatus.textContent = "SYSTEMS RESET - DEPLOY YOUR FLEET";
         startBtn.disabled = false;
