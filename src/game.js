@@ -1,4 +1,5 @@
-const { Ship, GameBoard, Player } = require('./ship');
+const { Ship, GameBoard } = require('./ship');
+const {triggerVictory, hideVictory} = require('./animations');
 
 function placeShipsRandomly(gameBoard) {
     const shipLengths = [5, 4, 3, 3, 2];
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetBtn = document.getElementById('reset-btn');
     const randomBtn = document.getElementById('random-btn');
     const gameStatus = document.querySelector('.game-status');
+    const hideVictoryBtn = document.querySelector('.continue-btn');
     let playerGameBoard = null;
     let computerGameBoard = null;
     let boardLocked = false;
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (role === 'player') {
                     cell.classList.add('player');
+                    cell.classList.add('disabled');
                 } else {
                     cell.classList.add('computer');
                 }
@@ -125,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             boardLocked = true;
                             computerBoard.classList.add('disabled');
                             playerBoard.classList.add('disabled');
+                            triggerVictory();
                             return;
                         }
                     } else {
@@ -152,10 +156,9 @@ document.addEventListener('DOMContentLoaded', function () {
         startBtn.disabled = false;
     });
 
-    // randomBtn.addEventListener('click', function () {
-    //     createBoard(playerBoard, true);
-    //     gameStatus.textContent = "RANDOM DEPLOYMENT COMPLETE - ACTIVATE RADAR";
-    // });
+    hideVictoryBtn.addEventListener('click', function() {
+        hideVictory();
+    });
 });
 }
 module.exports =  {load, placeShipsRandomly};
